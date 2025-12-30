@@ -1,0 +1,705 @@
+🎯 **ĐÂY LÀ BÀI TOÁN CỰC KỲ HAY - REVERSE ENGINEERING TỪ EXCEL!**
+
+---
+
+## 💡 **VẤN ĐỀ THỰC TẾ:**
+
+### **Halana's Excel Chaos:**
+
+```
+File 1: Đơn hàng tuần này.xlsx
+├─ Columns: Order ID, Customer, Items, Total, Status
+├─ Logic: Manual copy từ admin mỗi ngày
+└─ Purpose: CS tracking + đối chiếu với admin
+
+File 2: Procurement_suppliers.xlsx  
+├─ Columns: Order ID, Supplier A items, Supplier B items, Supplier C items
+├─ Logic: Purchasing manual split orders by supplier
+└─ Purpose: Generate PO per supplier
+
+File 3: Tồn kho nội bộ.xlsx
+├─ Columns: SKU, Location, Qty, Unit Price, Value
+├─ Logic: Warehouse manual update after GRN/DN
+└─ Purpose: Track internal stock
+
+File 4: Công nợ suppliers.xlsx
+├─ Columns: Supplier, PO ID, Amount, Paid, Balance, Due Date
+├─ Logic: Purchasing manual reconciliation
+└─ Purpose: Track payables
+
+File 5: Thu tiền khách hàng.xlsx
+├─ Columns: Order ID, Customer, Amount, Payment Method, Date Received
+├─ Logic: Accounting manual entry from bank + shipper
+└─ Purpose: Track cash in
+
+File 6: Hóa đơn VAT.xlsx
+├─ Columns: Invoice #, Type, Amount, VAT, Issue Date, Status
+├─ Logic: Accounting manual classify
+└─ Purpose: Tax compliance
+
+File 7: Chi phí vận chuyển.xlsx
+├─ Columns: Order ID, Distance, Cost, Driver, Date
+├─ Logic: CS/Accounting manual aggregate
+└─ Purpose: Cost tracking
+```
+
+**Current state:**
+```
+❌ No automatic connection between files
+❌ Manual lookup: "Order #123 ở file nào?"
+❌ Reconciliation nightmare: File 1 vs File 5
+❌ Copy-paste errors
+❌ Version conflicts
+❌ Cannot see big picture
+```
+
+---
+
+## 🎯 **BÀI TOÁN CẦN GIẢI:**
+
+### **GURU phải làm gì?**
+
+```
+Input: 7 Excel files (no documentation)
+
+GURU needs to:
+1. UNDERSTAND each file:
+   ├─ Columns là gì? (SKU, Order ID, Amount?)
+   ├─ Data types? (date, currency, text, number)
+   ├─ Business entities? (orders, customers, suppliers)
+   └─ Purpose? (tracking, calculation, reporting)
+
+2. DISCOVER relationships:
+   ├─ File 1 (orders) → File 5 (payments) via Order ID?
+   ├─ File 2 (procurement) → File 4 (payables) via Supplier?
+   ├─ File 3 (inventory) ← File 2 (procurement) via SKU?
+   └─ Hidden connections? (Customer in File 1 = Company in File 6?)
+
+3. EXTRACT business logic:
+   ├─ File 4: Balance = Amount - Paid (formula detection)
+   ├─ File 3: Value = Qty × Unit Price (calculation rule)
+   ├─ File 5: Group by Payment Method (aggregation logic)
+   └─ Cross-file logic: File 1 Total should match File 5 Amount
+
+4. RECONSTRUCT workflow:
+   ├─ Data flow: File 1 → File 2 → File 4
+   ├─ Dependencies: File 5 depends on File 1
+   ├─ Pain points: Manual lookups, reconciliation
+   └─ Inefficiencies: Duplicate data, no sync
+
+5. RECOMMEND solution:
+   ├─ Module architecture (Procurement, WMS, Cash, Invoice)
+   ├─ Data model (unified schema)
+   ├─ Integrations (how modules connect)
+   └─ Migration path (Excel → System)
+
+Output: End-to-end system proposal
+```
+
+---
+
+## 🤔 **TENSORFLOW CÓ PHẢI LÀ GIẢI PHÁP ĐÚNG?**
+
+### **TensorFlow strengths:**
+```
+✅ Pattern recognition (in 1000s files)
+✅ Classification (column types)
+✅ Similarity detection (duplicate data)
+
+Examples:
+- Column "Mã SP" = "SKU" = "Item Code" → Same entity
+- Pattern: Order ID format (ORD-XXXX)
+- Currency detection (50,000 vs 50000 vs 50K)
+```
+
+### **TensorFlow weaknesses cho bài toán này:**
+```
+❌ Relationship inference (File A connects to File B how?)
+❌ Business logic extraction (formulas, rules)
+❌ Workflow reconstruction (what happens after what?)
+❌ Semantic understanding (why this file exists?)
+
+TensorFlow sees:
+- Column names (text)
+- Data patterns (numbers, dates)
+- Statistical correlations
+
+TensorFlow KHÔNG thấy:
+- Business intent ("tại sao có file công nợ?")
+- Process flow ("procurement trước, payment sau")
+- Logic rules ("if payment method = COD then...")
+```
+
+---
+
+## 🏗️ **GIẢI PHÁP ĐỀ XUẤT - HYBRID APPROACH:**
+
+### **Layer 1: Feature Extraction (TensorFlow/ML)**
+
+**Nhiệm vụ: Understand individual files**
+
+```python
+class ExcelAnalyzer:
+    def __init__(self):
+        self.column_classifier = load_model('column_classifier.h5')
+        self.entity_detector = load_model('entity_detector.h5')
+    
+    def analyze_file(self, excel_file):
+        """Extract features from Excel file"""
+        
+        results = {
+            'columns': [],
+            'entities': [],
+            'data_types': {},
+            'patterns': {}
+        }
+        
+        for col in excel_file.columns:
+            # Classify column type
+            col_type = self.column_classifier.predict(
+                name=col,
+                sample_values=excel_file[col].head(10)
+            )
+            # → 'order_id', 'sku', 'amount', 'date', etc.
+            
+            results['columns'].append({
+                'name': col,
+                'type': col_type,
+                'confidence': col_type.confidence
+            })
+        
+        # Detect business entities
+        entities = self.entity_detector.predict(excel_file)
+        # → ['orders', 'customers', 'payments']
+        
+        results['entities'] = entities
+        
+        # Detect data patterns
+        for col in excel_file.columns:
+            if excel_file[col].dtype in ['int64', 'float64']:
+                results['patterns'][col] = {
+                    'min': excel_file[col].min(),
+                    'max': excel_file[col].max(),
+                    'avg': excel_file[col].mean(),
+                    'null_rate': excel_file[col].isna().sum() / len(excel_file)
+                }
+            
+            elif excel_file[col].dtype == 'object':
+                # Detect ID patterns
+                if is_id_column(excel_file[col]):
+                    results['patterns'][col] = {
+                        'format': detect_id_format(excel_file[col]),
+                        'prefix': detect_prefix(excel_file[col]),
+                        'unique_rate': excel_file[col].nunique() / len(excel_file)
+                    }
+        
+        # Detect formulas (if .xlsx with formulas)
+        formulas = extract_formulas(excel_file)
+        results['formulas'] = formulas
+        
+        return results
+```
+
+**Output for File 4 (Công nợ suppliers):**
+```json
+{
+  "file": "Công nợ suppliers.xlsx",
+  "columns": [
+    {"name": "Supplier", "type": "supplier_name", "confidence": 0.95},
+    {"name": "PO ID", "type": "purchase_order_id", "confidence": 0.92},
+    {"name": "Amount", "type": "currency", "confidence": 0.98},
+    {"name": "Paid", "type": "currency", "confidence": 0.98},
+    {"name": "Balance", "type": "currency", "confidence": 0.98},
+    {"name": "Due Date", "type": "date", "confidence": 0.99}
+  ],
+  "entities": ["suppliers", "purchase_orders", "payables"],
+  "formulas": [
+    {"cell": "E2", "formula": "=C2-D2", "meaning": "Balance = Amount - Paid"}
+  ],
+  "patterns": {
+    "PO ID": {"format": "PO-YYYY-NNNN", "prefix": "PO-", "unique_rate": 1.0},
+    "Amount": {"min": 50000, "max": 50000000, "avg": 5000000}
+  }
+}
+```
+
+---
+
+### **Layer 2: Relationship Discovery (Graph Analysis + LLM)**
+
+**Nhiệm vụ: Find connections between files**
+
+```python
+class RelationshipDiscovery:
+    def __init__(self, analyzed_files):
+        self.files = analyzed_files
+        self.graph = nx.DiGraph()  # NetworkX graph
+    
+    def discover_relationships(self):
+        """Find relationships between files"""
+        
+        relationships = []
+        
+        # Method 1: Column name matching
+        for file_a in self.files:
+            for file_b in self.files:
+                if file_a == file_b:
+                    continue
+                
+                # Find common columns
+                common_cols = self.find_common_columns(file_a, file_b)
+                
+                for col_a, col_b in common_cols:
+                    # Check if values overlap
+                    overlap = self.check_value_overlap(
+                        file_a.data[col_a],
+                        file_b.data[col_b]
+                    )
+                    
+                    if overlap > 0.5:  # 50% overlap
+                        relationships.append({
+                            'file_a': file_a.name,
+                            'column_a': col_a,
+                            'file_b': file_b.name,
+                            'column_b': col_b,
+                            'overlap': overlap,
+                            'type': 'foreign_key',
+                            'confidence': overlap
+                        })
+        
+        # Method 2: Semantic matching (LLM)
+        # Even if column names different, meanings same
+        for file_a in self.files:
+            for file_b in self.files:
+                if file_a == file_b:
+                    continue
+                
+                # LLM checks semantic similarity
+                semantic_links = self.llm_semantic_match(file_a, file_b)
+                relationships.extend(semantic_links)
+        
+        # Method 3: Data flow inference
+        # If File A has "Order ID" and "Total"
+        # File B has "Order ID" and "Amount Paid"
+        # → File B likely tracks payments for orders in File A
+        data_flows = self.infer_data_flows(relationships)
+        
+        return relationships, data_flows
+    
+    def find_common_columns(self, file_a, file_b):
+        """Find columns that might be same entity"""
+        matches = []
+        
+        for col_a in file_a.columns:
+            for col_b in file_b.columns:
+                # Direct name match
+                if col_a.lower() == col_b.lower():
+                    matches.append((col_a, col_b))
+                
+                # Type match + semantic similarity
+                elif (file_a.columns[col_a]['type'] == 
+                      file_b.columns[col_b]['type']):
+                    
+                    # Use LLM to check semantic similarity
+                    similarity = self.check_semantic_similarity(col_a, col_b)
+                    if similarity > 0.8:
+                        matches.append((col_a, col_b))
+        
+        return matches
+    
+    def check_value_overlap(self, series_a, series_b):
+        """Check how many values in common"""
+        set_a = set(series_a.dropna())
+        set_b = set(series_b.dropna())
+        
+        intersection = set_a & set_b
+        union = set_a | set_b
+        
+        if len(union) == 0:
+            return 0
+        
+        return len(intersection) / len(union)
+    
+    def llm_semantic_match(self, file_a, file_b):
+        """Use LLM to find semantic relationships"""
+        
+        prompt = f"""
+        Analyze these two Excel files and find relationships:
+        
+        File A: {file_a.name}
+        Columns: {file_a.column_names}
+        Entities: {file_a.entities}
+        Purpose: {file_a.inferred_purpose}
+        
+        File B: {file_b.name}
+        Columns: {file_b.column_names}
+        Entities: {file_b.entities}
+        Purpose: {file_b.inferred_purpose}
+        
+        Questions:
+        1. Do these files track related business processes?
+        2. Which columns might link them together?
+        3. What is the data flow direction (A→B or B→A or both)?
+        4. What is the business relationship?
+        
+        Answer in JSON format.
+        """
+        
+        response = llm.generate(prompt)
+        return parse_llm_response(response)
+```
+
+**Output for Halana's 7 files:**
+```json
+{
+  "relationships": [
+    {
+      "file_a": "Đơn hàng tuần này.xlsx",
+      "column_a": "Order ID",
+      "file_b": "Thu tiền khách hàng.xlsx",
+      "column_b": "Order ID",
+      "overlap": 0.95,
+      "type": "foreign_key",
+      "direction": "one_to_many",
+      "business_meaning": "Each order can have multiple payments (deposit, final payment)"
+    },
+    {
+      "file_a": "Đơn hàng tuần này.xlsx",
+      "column_a": "Order ID",
+      "file_b": "Procurement_suppliers.xlsx",
+      "column_b": "Order ID",
+      "overlap": 1.0,
+      "type": "foreign_key",
+      "direction": "one_to_one",
+      "business_meaning": "Each order is split into supplier procurement"
+    },
+    {
+      "file_a": "Procurement_suppliers.xlsx",
+      "column_a": "Supplier A items",
+      "file_b": "Công nợ suppliers.xlsx",
+      "column_b": "PO ID",
+      "overlap": 0.85,
+      "type": "derived",
+      "business_meaning": "Supplier items generate POs which create payables"
+    },
+    {
+      "file_a": "Procurement_suppliers.xlsx",
+      "column_a": "SKU",
+      "file_b": "Tồn kho nội bộ.xlsx",
+      "column_b": "SKU",
+      "overlap": 0.60,
+      "type": "conditional_match",
+      "business_meaning": "Some procurement from internal stock, some from suppliers"
+    }
+  ],
+  
+  "data_flows": [
+    {
+      "flow": "Order → Procurement → Payables → Payment Out",
+      "files": ["File1", "File2", "File4"],
+      "purpose": "Procure-to-pay process"
+    },
+    {
+      "flow": "Order → Payment In → Reconciliation",
+      "files": ["File1", "File5"],
+      "purpose": "Order-to-cash process"
+    },
+    {
+      "flow": "Procurement → Inventory → Stock Issue",
+      "files": ["File2", "File3"],
+      "purpose": "Inventory management"
+    }
+  ]
+}
+```
+
+---
+
+### **Layer 3: Workflow Reconstruction (LLM Reasoning)**
+
+**Nhiệm vụ: Understand business process**
+
+```python
+class WorkflowReconstructor:
+    def reconstruct_workflow(self, files, relationships):
+        """Reconstruct business workflow from Excel files"""
+        
+        # Build comprehensive context for LLM
+        context = self.build_context(files, relationships)
+        
+        prompt = f"""
+        You are a business analyst. Analyze these Excel files to reconstruct the complete business workflow.
+        
+        Files analyzed:
+        {json.dumps(context, indent=2)}
+        
+        Relationships discovered:
+        {json.dumps(relationships, indent=2)}
+        
+        Tasks:
+        1. Identify business processes (order-to-cash, procure-to-pay, etc.)
+        2. Reconstruct workflow steps
+        3. Identify actors (CS, Purchasing, Accounting, Warehouse)
+        4. Find pain points (manual steps, reconciliation issues)
+        5. Identify data duplication and inconsistencies
+        6. Map to standard system modules (Procurement, WMS, Cash Flow, Invoice)
+        
+        Output structured analysis in JSON.
+        """
+        
+        workflow = llm.generate(prompt)
+        
+        return parse_workflow(workflow)
+```
+
+**LLM Output:**
+```json
+{
+  "business_processes": [
+    {
+      "name": "Order-to-Cash",
+      "steps": [
+        {"step": 1, "actor": "CS", "action": "Copy orders to File 1", "file": "File1"},
+        {"step": 2, "actor": "CS", "action": "Confirm with customer", "tool": "Zalo"},
+        {"step": 3, "actor": "Warehouse", "action": "Pick & pack", "manual": true},
+        {"step": 4, "actor": "Shipper", "action": "Deliver & collect cash", "manual": true},
+        {"step": 5, "actor": "Accounting", "action": "Record payment in File 5", "file": "File5"},
+        {"step": 6, "pain": "Manual reconciliation File 1 vs File 5"}
+      ]
+    },
+    {
+      "name": "Procure-to-Pay",
+      "steps": [
+        {"step": 1, "actor": "Purchasing", "action": "Check File 3 for stock", "file": "File3"},
+        {"step": 2, "actor": "Purchasing", "action": "Split order by supplier in File 2", "file": "File2"},
+        {"step": 3, "actor": "Purchasing", "action": "Send PO via Zalo", "manual": true},
+        {"step": 4, "actor": "Supplier", "action": "Deliver goods", "external": true},
+        {"step": 5, "actor": "Purchasing", "action": "Update File 4 payables", "file": "File4"},
+        {"step": 6, "pain": "Manual tracking of who paid, who didn't"}
+      ]
+    }
+  ],
+  
+  "pain_points": [
+    {
+      "pain": "File 1 and File 5 not connected",
+      "impact": "Manual reconciliation 2 hours/day",
+      "cause": "No automatic payment matching",
+      "solution": "Cash Flow Management module"
+    },
+    {
+      "pain": "File 2 and File 3 manual lookup",
+      "impact": "Over-purchasing, stock blindness",
+      "cause": "No real-time inventory visibility",
+      "solution": "WMS + Procurement integration"
+    },
+    {
+      "pain": "File 4 manual reconciliation",
+      "impact": "Missed payments, supplier issues",
+      "cause": "No automatic payables tracking",
+      "solution": "Procurement module with AR/AP"
+    }
+  ],
+  
+  "data_duplication": [
+    {
+      "entity": "Order ID",
+      "appears_in": ["File1", "File2", "File5", "File7"],
+      "issue": "4x data entry, version conflicts",
+      "solution": "Single source of truth in Order Management"
+    },
+    {
+      "entity": "SKU",
+      "appears_in": ["File2", "File3"],
+      "issue": "Inventory not real-time",
+      "solution": "WMS as master SKU database"
+    }
+  ],
+  
+  "recommended_modules": [
+    {
+      "module": "Procurement",
+      "replaces": ["File2", "File4"],
+      "features": ["PO generation", "Supplier payables", "Auto reconciliation"]
+    },
+    {
+      "module": "WMS",
+      "replaces": ["File3"],
+      "features": ["Multi-location inventory", "GRN/DN", "Valuation"]
+    },
+    {
+      "module": "Cash Flow Management",
+      "replaces": ["File5", "File7"],
+      "features": ["Payment matching", "Cash position", "Revenue reconciliation"]
+    },
+    {
+      "module": "Invoice Management",
+      "replaces": ["File6"],
+      "features": ["VAT tracking", "Tax reports"]
+    }
+  ],
+  
+  "data_migration": {
+    "File1": "Import to Order Management (one-time)",
+    "File2": "Transform to PO records",
+    "File3": "Import to WMS Inventory",
+    "File4": "Import to Procurement Payables",
+    "File5": "Import to Cash Flow Payments",
+    "File6": "Import to Invoice Management",
+    "File7": "Derive from Orders + Deliveries (no manual file)"
+  }
+}
+```
+
+---
+
+## 🎯 **COMPLETE SOLUTION ARCHITECTURE:**
+
+```
+┌─────────────────────────────────────────────────────────┐
+│              GURU EXCEL ANALYZER                         │
+└─────────────────────────────────────────────────────────┘
+                          │
+                          │ Upload 7 Excel files
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│         LAYER 1: FEATURE EXTRACTION                      │
+│         (TensorFlow + Rule-based)                        │
+├─────────────────────────────────────────────────────────┤
+│ For each file:                                           │
+│ ✓ Classify columns (order_id, sku, amount, date, etc.) │
+│ ✓ Detect entities (orders, customers, suppliers, etc.)  │
+│ ✓ Extract formulas (Balance = Amount - Paid)            │
+│ ✓ Find patterns (ID formats, data ranges)               │
+└─────────────────────────────────────────────────────────┘
+                          │
+                          │ File metadata
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│         LAYER 2: RELATIONSHIP DISCOVERY                  │
+│         (Graph Analysis + LLM)                           │
+├─────────────────────────────────────────────────────────┤
+│ Between files:                                           │
+│ ✓ Find common columns (Order ID appears in File 1, 2, 5)│
+│ ✓ Check value overlap (95% Order IDs match)             │
+│ ✓ Infer foreign keys (File1.OrderID → File5.OrderID)    │
+│ ✓ Detect data flows (File1 → File2 → File4)             │
+│ ✓ Build relationship graph                              │
+└─────────────────────────────────────────────────────────┘
+                          │
+                          │ Relationships
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│         LAYER 3: WORKFLOW RECONSTRUCTION                 │
+│         (LLM Reasoning)                                  │
+├─────────────────────────────────────────────────────────┤
+│ Business understanding:                                  │
+│ ✓ Identify processes (order-to-cash, procure-to-pay)    │
+│ ✓ Map actors (CS, Purchasing, Accounting)               │
+│ ✓ Find pain points (manual reconciliation)              │
+│ ✓ Detect duplication (Order ID in 4 files)              │
+│ ✓ Recommend modules (Procurement, WMS, Cash, Invoice)   │
+└─────────────────────────────────────────────────────────┘
+                          │
+                          │ Solution proposal
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│         OUTPUT: END-TO-END SYSTEM DESIGN                 │
+├─────────────────────────────────────────────────────────┤
+│ • Module architecture (4 modules for Halana)             │
+│ • Data model (unified schema)                            │
+│ • Migration plan (Excel → Database)                      │
+│ • Integration map (module connections)                   │
+│ • Roadmap (Procurement first, then WMS, etc.)            │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 💻 **IMPLEMENTATION:**
+
+### **Tech Stack:**
+
+```python
+# Layer 1: Feature Extraction
+├─ pandas: Read Excel files
+├─ openpyxl: Extract formulas
+├─ TensorFlow: Column classification
+│  └─ Model trained on 1000s labeled columns
+├─ spaCy/BERT: Entity recognition
+└─ Rule-based: Pattern detection
+
+# Layer 2: Relationship Discovery
+├─ NetworkX: Graph analysis
+├─ Pandas: Data overlap calculation
+├─ LLM (Claude): Semantic matching
+└─ Graph algorithms: Flow detection
+
+# Layer 3: Workflow Reconstruction
+├─ LLM (Claude): Business reasoning
+├─ Prompt engineering: Structured output
+└─ JSON parsing: Extract recommendations
+```
+
+---
+
+## ✅ **TRẢ LỜI TRỰC TIẾP:**
+
+### **TensorFlow có phải là giải pháp?**
+
+**Trả lời: KHÔNG - TensorFlow ALONE không đủ. Cần HYBRID.**
+
+```
+TensorFlow tốt cho:
+✓ Layer 1: Column classification (fast, accurate)
+✓ Layer 1: Pattern detection (ID formats, etc.)
+✓ Layer 2: Value overlap calculation (similarity)
+
+TensorFlow KHÔNG đủ cho:
+✗ Layer 2: Semantic relationship inference
+✗ Layer 3: Business process understanding
+✗ Layer 3: Pain point identification
+✗ Layer 3: Solution recommendation
+
+→ Cần kết hợp: TensorFlow + Graph Analysis + LLM
+```
+
+### **Giải pháp tối ưu:**
+
+```
+3-Layer Hybrid:
+1. TensorFlow: Feature extraction (fast, cheap)
+2. Graph + LLM: Relationship discovery (smart)
+3. LLM: Workflow reconstruction (reasoning)
+
+Cost/time:
+- Layer 1: ~5 seconds (mostly TensorFlow)
+- Layer 2: ~30 seconds (graph + few LLM calls)
+- Layer 3: ~60 seconds (complex LLM reasoning)
+
+Total: ~90 seconds to analyze 7 files
+Cost: ~$0.20 in API calls
+```
+
+### **Deliverable cho customer:**
+
+```
+"GURU đã phân tích 7 file Excel của bạn.
+
+Phát hiện:
+- 4 business processes
+- 12 pain points
+- 8 data duplication issues
+
+Đề xuất:
+- 4 modules (Procurement, WMS, Cash Flow, Invoice)
+- Thay thế 7 files Excel
+- Migration plan: 4 phases, 4 months
+- ROI: 90% time saved, 99% fewer errors
+
+Approve để GURU build?"
+```
+
+---
+
+**Approach này có khả thi không?** 🚀
