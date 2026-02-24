@@ -1,0 +1,96 @@
+                    ┌──────────────────────────────────────────────────┐
+                    │     INSEAD PhD – DECISION SCIENCES               │
+                    │                                                  │
+                    │  Total: 312 units                                │
+                    │  ├─ Core Courses:     112 units                  │
+                    │  └─ Advanced Courses: 200 units                  │
+                    └─────────────────────┬────────────────────────────┘
+                                          │
+        ┌──────────────┬──────────────────┼───────────────────┬──────────────────┐
+        │              │                  │                   │                  │
+        ▼              ▼                  ▼                   ▼                  ▼
+  ┌───────────┐  ┌───────────┐    ┌──────────────┐    ┌───────────────┐  ┌──────────────┐
+  │ A. TOÁN   │  │ B. KINH   │    │ C. KHOA HỌC  │    │ D. HÀNH VI &  │  │ E. PHƯƠNG    │
+  │   HỌC &   │  │   TẾ HỌC  │    │   QUYẾT ĐỊNH │    │   TÂM LÝ HỌC  │  │   PHÁP       │
+  │   THỐNG   │  │           │    │   (CORE)     │    │               │  │   NGHIÊN CỨU │
+  │   KÊ      │  │           │    │              │    │               │  │              │
+  └─────┬─────┘  └─────┬─────┘    └──────┬───────┘    └───────┬───────┘  └──────┬───────┘
+        │              │                 │                    │                 │
+        │              │                 │                    │                 │
+  ┌─────────────────────────────────────────────────────────────────────────────────────┐
+  │  A. TOÁN HỌC & THỐNG KÊ                                              [Backbone]     │
+  ├─────────────────────────────────────────────────────────────────────────────────────┤
+  │                                                                                     │
+  │  CỐT LÕI ★                          NÂNG CAO                                        │
+  │  ─────────────────────────────       ─────────────────────────────────────────      │
+  │  ► PhD Math Course                   ► Real Analysis                                │
+  │  ► Probability & Statistics I A      ► Multivariate Methods                         │
+  │  ► Probability & Statistics I B      ► Advanced Multivariate Methods                │
+  │  ► Bayesian Analysis ★               ► Bayesian Methodology & Computation           │
+  │  ► Econometrics A ★                  ► Applied Econometrics                         │
+  │  ► Econometrics B ★                  ► Microeconometrics                            │
+  │  ► Dynamic Programming Applications  ► Discrete Stochastic Processes                │
+  │                                                                                     │
+  └─────────────────────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────────────────────┐
+  │  B. KINH TẾ HỌC                                                    [Theory]         │
+  ├─────────────────────────────────────────────────────────────────────────────────────┤
+  │                                                                                     │
+  │  CỐT LÕI ★                          NÂNG CAO                                        │
+  │  ─────────────────────────────       ─────────────────────────────────────────      │
+  │  ► Microeconomic Theory A ★          ► Game Theory A                                │
+  │    (Quantitative)                    ► Game Theory B                                │
+  │  ► Microeconomic Theory B ★          ► Information Economics A                      │
+  │    (Quantitative)                    ► Information Economics B                      │
+  │  ► Applied Microeconomics            ► Industrial Organization A                    │
+  │    (Non-Quantitative)                ► Industrial Organization B                    │
+  │                                      ► Organizational Economics                     │
+  │                                      ► Macroeconomics & Finance                     │
+  │                                      ► Behavioral Finance A / B / C                 │
+  │                                      ► Contract Theory                              │
+  │                                                                                     │
+  └─────────────────────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────────────────────┐
+  │  C. KHOA HỌC QUYẾT ĐỊNH (CORE)                            [Heart of DI]             │
+  ├─────────────────────────────────────────────────────────────────────────────────────┤
+  │                                                                                     │
+  │  CỐT LÕI ★                          NÂNG CAO                                        │
+  │  ─────────────────────────────       ─────────────────────────────────────────      │
+  │  ► Behavioral Decision Theory ★      ► Foundations of Machine Learning & AI         │
+  │  ► Choice Theory and Behavior ★      ► Fundamentals of Optimization                 │
+  │  ► Selected Topics in Decision       ► Linear Optimization                          │
+  │    Sciences A ★                      ► Consumer Decision Making                     │
+  │  ► Selected Topics in Decision       ► Decision Neuroscience for Management         │
+  │    Sciences B                                                                       │
+  │                                                                                     │
+  └─────────────────────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────────────────────┐
+  │  D. HÀNH VI & TÂM LÝ HỌC                                   [Human Element]          │
+  ├─────────────────────────────────────────────────────────────────────────────────────┤
+  │                                                                                     │
+  │  CỐT LÕI ★                          NÂNG CAO                                        │
+  │  ─────────────────────────────       ─────────────────────────────────────────      │
+  │  ► Introduction to Social            ► Consumer Behavior A                          │
+  │    Psychology ★                      ► Consumer Behavior B                          │
+  │  ► Social Theory ★                   ► Organizational Behavior                      │
+  │                                      ► Organizational Psychology                    │
+  │                                      ► Social Psychological Foundations             │
+  │                                        of Management Disciplines                    │
+  │                                      ► Decision Neuroscience for Mgmt               │
+  │                                                                                     │
+  └─────────────────────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────────────────────┐
+  │  E. PHƯƠNG PHÁP NGHIÊN CỨU                                   [Research Skills]      │
+  ├─────────────────────────────────────────────────────────────────────────────────────┤
+  │                                                                                     │
+  │  CỐT LÕI ★                          NÂNG CAO                                        │
+  │  ─────────────────────────────       ─────────────────────────────────────────      │
+  │  ► Research Methods ★                ► Experimental Economics                       │
+  │  ► Research Ethics ★                 ► Experimental Design                          │
+  │                                      ► Field Experiments                            │
+  │                                                                                     │
+  └─────────────────────────────────────────────────────────────────────────────────────┘
